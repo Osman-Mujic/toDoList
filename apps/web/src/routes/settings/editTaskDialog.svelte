@@ -1,0 +1,105 @@
+<script lang="ts">
+	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import { Input } from '$lib/components/ui/input/index.js';
+	import * as Form from '$lib/components/ui/form';
+	import { type Infer, superForm } from 'sveltekit-superforms';
+	import { zodClient } from 'sveltekit-superforms/adapters';
+	import dayjs from '@todo/utilities/dayjs';
+	import Button from '$lib/components/ui/button/button.svelte';
+	import { PenOff, Check } from 'lucide-svelte';
+
+	import { editFormSchema, type EditFormSchema } from '@todo/api/src/settings/schema';
+	import { client } from '$lib/client';
+
+	export let editingTask: Infer<EditFormSchema>;
+	export let open: boolean = false;
+
+	const editForm = superForm(editingTask, {
+		validators: zodClient(editFormSchema)
+	});
+
+	const { form: editFormData, enhance: editEnhance } = editForm;
+
+	const editData = async (event: Event) => {
+		event.preventDefault();
+
+		const taskName = $editFormData.taskName;
+		const startTimeUTC = dayjs($editFormData.startTime).utc().toISOString();
+		const endTimeUTC = dayjs($editFormData.endTime).utc().toISOString();
+
+		const payload = {
+			taskName,
+			startTime: startTimeUTC,
+			endTime: endTimeUTC
+		};
+
+		if (typeof editingTask.id !== 'string') {
+			console.error('Invalid task ID');
+			return;
+		}
+
+		try {
+			const response = await client.tasks[':id'].$put({
+				param: {
+					id: editingTask.id
+				},
+				json: payload
+			});
+			if (!response.ok) {
+				throw new Error('Failed to update data');
+			}
+			open = false;
+		} catch (error) {
+			console.error('Error:', error);
+		}
+	};
+</script>
+
+<Dialog.Root bind:open>
+	<Dialog.Content class="sm:max-w-[425px]  bg-gray-500 text-black p-4 rounded-xl">
+		<Dialog.Header>
+			<Dialog.Title>Edit Task</Dialog.Title>
+			<Dialog.Description class="text-black">
+				Make changes to your task here. Click save when you're done.
+			</Dialog.Description>
+		</Dialog.Header>
+
+		{#if editingTask}
+			<form
+				class="w-full max-w-md bg-gray-500 text-black p-4 rounded-xl"
+				method="POST"
+				use:editEnhance
+				on:submit={editData}
+			>
+				<Form.Field form={editForm} name="taskName">
+					<Form.Control let:attrs>
+						<Form.Label><strong>Task Name:</strong></Form.Label>
+						<Input {...attrs} bind:value={$editFormData.taskName} />
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
+				<Form.Field form={editForm} name="startTime">
+					<Form.Control let:attrs>
+						<Form.Label>Start Time</Form.Label>
+						<Input type="datetime-local" {...attrs} bind:value={$editFormData.startTime} />
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
+				<Form.Field form={editForm} name="endTime">
+					<Form.Control let:attrs>
+						<Form.Label>End Time</Form.Label>
+						<Input type="datetime-local" {...attrs} bind:value={$editFormData.endTime} />
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
+				<Button class="bg-green-600 text-white" type="submit"><Check /> Save changes</Button>
+				<Button
+					variant="destructive"
+					on:click={() => {
+						open = false;
+					}}><PenOff /> Cancel</Button
+				>
+			</form>
+		{/if}
+	</Dialog.Content>
+</Dialog.Root>

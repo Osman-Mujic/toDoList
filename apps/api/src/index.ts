@@ -1,26 +1,17 @@
-import dotenv from "dotenv";
 import { Hono } from "hono";
-import { serve, type HttpBindings } from "@hono/node-server";
+import { type HttpBindings } from "@hono/node-server";
 import { cors } from "hono/cors";
-import { createClient } from "@libsql/client";
 import { z } from "zod";
 import { formSchema } from "./settings/schema";
-import { drizzle } from "drizzle-orm/libsql";
 import { tasks } from "@todo/db/schema";
 import { eq } from "drizzle-orm";
 import { zValidator } from "@hono/zod-validator";
+import { getDatabaseClient } from "../../db/index";
 
-dotenv.config();
-
-type Bindings = HttpBindings & {
-  /* ... */
+type Bindings = {
+  TURSO_DATABASE_URL: string;
+  TURSO_AUTH_TOKEN: string;
 };
-const client = createClient({
-  url: process.env.TURSO_DATABASE_URL!,
-  authToken: process.env.TURSO_AUTH_TOKEN!,
-});
-
-const db = drizzle(client);
 
 const app = new Hono<{ Bindings: Bindings }>()
   .use(
@@ -33,7 +24,7 @@ const app = new Hono<{ Bindings: Bindings }>()
     try {
       const { taskName, startTime, endTime } = c.req.valid("json");
       const id = crypto.randomUUID();
-
+      const db = getDatabaseClient(c.env);
       await db.insert(tasks).values({
         id,
         task_name: taskName,
@@ -55,6 +46,7 @@ const app = new Hono<{ Bindings: Bindings }>()
   })
 
   .get("/tasks", async (c) => {
+    const db = getDatabaseClient(c.env);
     try {
       const result = await db.select().from(tasks);
 
@@ -77,6 +69,7 @@ const app = new Hono<{ Bindings: Bindings }>()
     zValidator("param", z.object({ id: z.string().uuid() })),
     zValidator("json", formSchema),
     async (c) => {
+      const db = getDatabaseClient(c.env);
       const { id } = c.req.valid("param");
       try {
         const { taskName, startTime, endTime } = c.req.valid("json");
@@ -115,6 +108,7 @@ const app = new Hono<{ Bindings: Bindings }>()
     async (c) => {
       //const id = c.req.param("id") as string;
       const { id } = c.req.valid("param");
+      const db = getDatabaseClient(c.env);
       try {
         await db.delete(tasks).where(eq(tasks.id, id));
 
@@ -130,5 +124,4 @@ const app = new Hono<{ Bindings: Bindings }>()
   );
 
 export type AppType = typeof app;
-serve(app);
 export default app;

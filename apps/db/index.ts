@@ -1,0 +1,19 @@
+import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/libsql";
+
+type Config = {
+  TURSO_DATABASE_URL: string;
+  TURSO_AUTH_TOKEN: string;
+};
+
+export function getDatabaseClient(config: Config) {
+  const url = config.TURSO_DATABASE_URL;
+  const authToken = config.TURSO_AUTH_TOKEN;
+
+  const client = createClient({
+    url,
+    authToken,
+  });
+
+  return drizzle(client);
+}

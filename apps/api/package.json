@@ -1,7 +1,8 @@
 {
   "name": "@todo/api",
   "scripts": {
-    "dev": "tsx watch src/index.ts"
+    "dev": "wrangler dev src/index.ts",
+    "deploy": "wrangler deploy --minify src/index.ts"
   },
   "dependencies": {
     "@todo/db": "workspace:*",
@@ -14,8 +15,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "^20.11.17",
     "drizzle-kit": "^0.24.1",
-    "tsx": "^4.7.1"
+    "@cloudflare/workers-types": "^4.20240529.0",
+    "wrangler": "^3.57.2"
   }
 }

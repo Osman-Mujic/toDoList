@@ -3,7 +3,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
-	import { registerSchema, type RegisterSchema } from '@todo/api/src/settings/schema';
+	import { registerSchema, type RegisterSchema } from '../../../../api/src/settings/schema';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { client } from '$lib/client';
 	import { onMount } from 'svelte';
@@ -45,7 +45,7 @@
 	};
 </script>
 
-<div class="flex h-m-1/2">
+<div class="flex min-h-screen">
 	<div
 		class="w-9/12 hidden lg:block bg-cover bg-origin-border bg-gradient-to-br from-white to-black rounded-3xl"
 	></div>

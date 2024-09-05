@@ -4,7 +4,9 @@
 	export let data: LayoutData;
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import { browser } from '$app/environment';
+	import { ModeWatcher } from 'mode-watcher';
 	import { SvelteQueryDevtools } from '@tanstack/svelte-query-devtools';
+	import NavBar from './NavBar.svelte';
 	const queryClient = new QueryClient({
 		defaultOptions: {
 			queries: {
@@ -15,6 +17,8 @@
 </script>
 
 <QueryClientProvider client={queryClient}>
+	<ModeWatcher />
+	<NavBar />
 	<slot />
 	<SvelteQueryDevtools />
 </QueryClientProvider>

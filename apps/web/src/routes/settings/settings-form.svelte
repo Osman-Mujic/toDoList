@@ -15,6 +15,8 @@
 		createEditTaskMutation
 	} from '$lib/taskService';
 	import { useQueryClient } from '@tanstack/svelte-query';
+	import * as Table from '$lib/components/ui/table/index.js';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	export let data: SuperValidated<Infer<FormSchema>>;
 
 	let editingTask: {
@@ -42,7 +44,6 @@
 		const startTimeUTC = dayjs($formData.startTime).utc().toISOString();
 		const endTimeUTC = dayjs($formData.endTime).utc().toISOString();
 		if (editingTask) {
-			// Update existing task
 			try {
 				await $editTaskMutation.mutateAsync({
 					id: editingTask.id,
@@ -55,7 +56,6 @@
 				console.error('Error updating task:', error);
 			}
 		} else {
-			// Create new task
 			try {
 				await $postTaskMutation.mutateAsync({ taskName, startTimeUTC, endTimeUTC });
 				editingTask = null;
@@ -65,12 +65,16 @@
 		}
 	};
 
+	async function handleLogout() {
+		localStorage.clear();
+	}
+
 	const handleDelete = (id: string) => {
 		$deleteTaskMutation.mutate(id);
 	};
 	const handleEditTask = (id: string) => {
 		if ($fetchQuery.data) {
-			const task = $fetchQuery.data.find((task) => task.id === id);
+			const task = $fetchQuery.data.find((task: any) => task.id === id);
 			if (task) {
 				editingTask = {
 					...task,
@@ -94,11 +98,12 @@
 	}
 </script>
 
-<div class="flex min-h-svh bg-gray-700 justify-center m-auto items-center flex-col">
+<div class="flex justify-center items-center flex-col">
 	<form
-		class="w-full max-w-md bg-gray-500 p-6 rounded-xl"
+		class="w-full max-w-md p-6 rounded-xl"
 		method="POST"
 		use:enhance
+		action="?/submit"
 		on:submit={onsubmit}
 	>
 		<Form.Field {form} name="taskName">
@@ -122,38 +127,53 @@
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
-		<Form.Button>Submit</Form.Button>
+		<div class="flex justify-center mt-4">
+			<Form.Button class="mx-auto">Submit</Form.Button>
+		</div>
 	</form>
+</div>
+<div class="flex justify-center items-center flex-col">
 	{#if $fetchQuery.isPending}
-		<div class="w-full max-w-md bg-gray-600 text-white p-4 rounded-xl">
+		<div class="w-full max-w-md p-4 rounded-xl">
 			<p>Loading...</p>
 		</div>
 	{:else if $fetchQuery.isError}
-		<div class="w-full max-w-md bg-gray-600 text-white p-4 rounded-xl">
+		<div class="w-full max-w-md p-4 rounded-xl">
 			<p>Error: {$fetchQuery.error}</p>
 		</div>
 	{:else}
-		<div class="w-full max-w-md bg-gray-600 text-white p-4 rounded-xl">
-			{#each $fetchQuery.data as { id, taskName, startTime, endTime }}
-				<div class="mb-4e">
-					<p><strong>Task Name:</strong> {taskName}</p>
-					<p>
-						<strong>Start Time (Local):</strong>
-						{dayjs(startTime).local().format('YYYY-MM-DD HH:mm')}
-					</p>
-					<p>
-						<strong>End Time (Local):</strong>
-						{dayjs(endTime).local().format('YYYY-MM-DD HH:mm')}
-					</p>
-					<Button on:click={() => handleEditTask(id)}><PenLine /> Edit</Button>
-					<Button
-						variant="destructive"
-						class="hover:animate-pulse"
-						on:click={() => handleDelete(id)}
-						><Trash2 /> Delete
-					</Button>
-				</div>
-			{/each}
+		<div class="w-full p-4 rounded-xl">
+			<Table.Root class="min-w-vh ">
+				<Table.Caption>Your tasks</Table.Caption>
+				<Table.Header>
+					<Table.Row>
+						<Table.Head>Task Name</Table.Head>
+						<Table.Head>Start Time</Table.Head>
+						<Table.Head>End Time</Table.Head>
+					</Table.Row>
+				</Table.Header>
+				<Table.Body>
+					{#each $fetchQuery.data as { id, taskName, startTime, endTime }}
+						<Table.Row>
+							<DropdownMenu.Root>
+								<DropdownMenu.Trigger>
+									<Table.Cell>{taskName}</Table.Cell>
+								</DropdownMenu.Trigger>
+								<DropdownMenu.Content>
+									<DropdownMenu.Group>
+										<DropdownMenu.Label>Make changes</DropdownMenu.Label>
+										<DropdownMenu.Separator />
+										<DropdownMenu.Item on:click={() => handleEditTask(id)}>Edit</DropdownMenu.Item>
+										<DropdownMenu.Item on:click={() => handleDelete(id)}>Delete</DropdownMenu.Item>
+									</DropdownMenu.Group>
+								</DropdownMenu.Content>
+							</DropdownMenu.Root>
+							<Table.Cell>{dayjs(startTime).local().format('YYYY-MM-DD HH:mm')}</Table.Cell>
+							<Table.Cell>{dayjs(endTime).local().format('YYYY-MM-DD HH:mm')}</Table.Cell>
+						</Table.Row>
+					{/each}
+				</Table.Body>
+			</Table.Root>
 		</div>
 	{/if}
 </div>

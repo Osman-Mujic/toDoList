@@ -18,6 +18,7 @@
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"@todo/api": "workspace:*",
+		"@todo/db": "workspace:*",
 		"@todo/utilities": "workspace:*",
 		"@types/eslint": "^9.6.0",
 		"autoprefixer": "^10.4.20",
@@ -39,14 +40,20 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@libsql/client": "^0.9.0",
+		"@lucia-auth/adapter-sqlite": "^3.0.2",
+		"@node-rs/argon2": "^1.8.3",
 		"@tanstack/svelte-query": "^5.52.2",
 		"@tanstack/svelte-query-devtools": "^5.52.2",
 		"bits-ui": "^0.21.13",
 		"clsx": "^2.1.1",
 		"dayjs": "^1.11.12",
+		"drizzle-orm": "^0.33.0",
 		"formsnap": "^1.0.1",
 		"hono": "^4.5.8",
+		"lucia": "^3.2.0",
 		"lucide-svelte": "^0.428.0",
+		"mode-watcher": "^0.4.1",
 		"tailwind-merge": "^2.5.2",
 		"tailwind-variants": "^0.2.1"
 	}

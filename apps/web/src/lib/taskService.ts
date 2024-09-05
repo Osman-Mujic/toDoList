@@ -1,16 +1,16 @@
 import { client } from '$lib/client';
-import { createQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
-import dayjs from '@todo/utilities/dayjs';
+import { createQuery, createMutation } from '@tanstack/svelte-query';
 import type { QueryClient } from '@tanstack/svelte-query';
+import type { Task } from '@todo/utilities/types';
 
 export const fetchTasks = () => {
-	return createQuery({
+	return createQuery<Task[]>({
 		queryKey: ['tasks'],
 		queryFn: async () => {
 			try {
 				const response = await client.tasks.$get();
 				if (!response.ok) throw new Error('Failed to fetch tasks');
-				const responseData = await response.json();
+				const responseData = (await response.json()) as Task[];
 				return responseData;
 			} catch (error) {
 				console.error('Error fetching tasks:', error);

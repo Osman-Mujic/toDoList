@@ -56,17 +56,16 @@
 </script>
 
 <Dialog.Root bind:open>
-	<Dialog.Content class="sm:max-w-[425px]  bg-gray-500 text-black p-4 rounded-xl">
+	<Dialog.Content class="sm:max-w-[425px]   p-4 rounded-xl">
 		<Dialog.Header>
 			<Dialog.Title>Edit Task</Dialog.Title>
-			<Dialog.Description class="text-black">
+			<Dialog.Description>
 				Make changes to your task here. Click save when you're done.
 			</Dialog.Description>
 		</Dialog.Header>
-
 		{#if editingTask}
 			<form
-				class="w-full max-w-md bg-gray-500 text-black p-4 rounded-xl"
+				class="w-full max-w-md p-2 rounded-xl"
 				method="POST"
 				use:editEnhance
 				on:submit={editData}
@@ -92,13 +91,15 @@
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>
-				<Button class="bg-green-600 text-white" type="submit"><Check /> Save changes</Button>
-				<Button
-					variant="destructive"
-					on:click={() => {
-						open = false;
-					}}><PenOff /> Cancel</Button
-				>
+				<div class="flex justify-between mt-4">
+					<Button type="submit" class="mr-2"><Check /> Save changes</Button>
+					<Button
+						variant="destructive"
+						on:click={() => {
+							open = false;
+						}}><PenOff /> Cancel</Button
+					>
+				</div>
 			</form>
 		{/if}
 	</Dialog.Content>

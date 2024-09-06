@@ -1,7 +1,5 @@
 name = "hono-todoapi"
-compatibility_date = "2024-09-02"
-nodejs_compat_v2 = true
-node_compat = true
+compatibility_date = "2024-09-06"
 compatibility_flags = ["nodejs_als"]
 
 [vars]

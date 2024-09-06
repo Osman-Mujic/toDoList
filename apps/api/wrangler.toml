@@ -2,6 +2,7 @@ name = "hono-todoapi"
 compatibility_date = "2024-09-02"
 nodejs_compat_v2 = true
 node_compat = true
+compatibility_flags = ["nodejs_als"]
 
 [vars]
 TURSO_DATABASE_URL = "libsql://todolist-db-osmanmujic.turso.io"

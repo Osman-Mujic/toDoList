@@ -45,6 +45,7 @@
 		"@inlang/paraglide-sveltekit": "0.11.0",
 		"@libsql/client": "^0.9.0",
 		"@lucia-auth/adapter-sqlite": "^3.0.2",
+		"@sveltejs/adapter-cloudflare": "^4.7.2",
 		"@tanstack/svelte-query": "^5.52.2",
 		"@tanstack/svelte-query-devtools": "^5.52.2",
 		"bits-ui": "^0.21.13",

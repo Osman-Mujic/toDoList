@@ -1,7 +1,6 @@
 import { getLucia } from '@todo/utilities/server/lucia';
 import { fail } from '@sveltejs/kit';
 import { getTursoClient } from '@todo/db/index';
-import { verify } from '@node-rs/argon2';
 import type { Actions, PageServerLoad } from './$types.js';
 import { users } from '@todo/db/schema';
 import { getDatabaseClient } from '@todo/db/index';

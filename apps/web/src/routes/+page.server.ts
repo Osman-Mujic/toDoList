@@ -4,7 +4,7 @@ import { getTursoClient } from '@todo/db/index';
 import type { Actions, PageServerLoad } from './$types';
 import { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } from '$env/static/private';
 export const load: PageServerLoad = async ({ locals }) => {
-	// ...
+	throw redirect(307, '/settings');
 };
 
 export const actions: Actions = {

@@ -18,3 +18,15 @@ export function getDatabaseClient(config: Config) {
 
   return drizzle(client, { schema });
 }
+
+export function getTursoClient(config: Config) {
+  const url = config.TURSO_DATABASE_URL;
+  const authToken = config.TURSO_AUTH_TOKEN;
+
+  const client = createClient({
+    url,
+    authToken,
+  });
+
+  return client;
+}

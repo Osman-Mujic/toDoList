@@ -1,5 +1,6 @@
-import { lucia } from '$lib/lucia';
+import { getLucia } from '@todo/utilities/server/lucia';
 import { fail } from '@sveltejs/kit';
+import { getTursoClient } from '@todo/db/index';
 import { verify } from '@node-rs/argon2';
 import type { Actions, PageServerLoad } from './$types.js';
 import { users } from '@todo/db/schema';
@@ -20,6 +21,12 @@ export const load: PageServerLoad = async (event: any) => {
 };
 export const actions: Actions = {
 	default: async (event: any) => {
+		const lucia = getLucia(
+			getTursoClient({
+				TURSO_DATABASE_URL,
+				TURSO_AUTH_TOKEN
+			})
+		);
 		try {
 			console.log('Starting login process...');
 			const formData = await event.request.formData();

@@ -1,7 +1,8 @@
 import { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { lucia } from "../../../web/src/lib/lucia";
-import type { User } from "../../../utilities/types";
+import { getLucia } from "@todo/utilities/server/lucia";
+import { getTursoClient } from "@todo/db/index";
+
 const authorize: MiddlewareHandler = async (c, next) => {
   const authorizationHeader = c.req.raw.headers.get("Authorization");
 
@@ -10,7 +11,12 @@ const authorize: MiddlewareHandler = async (c, next) => {
       message: "Missing authorization header",
     });
   }
-
+  const lucia = getLucia(
+    getTursoClient({
+      TURSO_DATABASE_URL: c.env.TURSO_DATABASE_URL,
+      TURSO_AUTH_TOKEN: c.env.TURSO_AUTH_TOKEN,
+    })
+  );
   const sessionId = lucia.readBearerToken(authorizationHeader);
 
   if (!sessionId) {

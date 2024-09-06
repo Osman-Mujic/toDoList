@@ -3,7 +3,9 @@ import { fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { formSchema, editFormSchema } from '@todo/api/src/settings/schema';
-import { lucia } from '$lib/lucia';
+import { getLucia } from '@todo/utilities/server/lucia';
+import { getTursoClient } from '@todo/db/index';
+import { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } from '$env/static/private';
 export const load: PageServerLoad = async ({ locals }) => {
 	const form = await superValidate(zod(formSchema));
 	const editForm = await superValidate(zod(editFormSchema));
@@ -34,6 +36,12 @@ export const actions: Actions = {
 	},
 
 	logout: async (event) => {
+		const lucia = getLucia(
+			getTursoClient({
+				TURSO_DATABASE_URL,
+				TURSO_AUTH_TOKEN
+			})
+		);
 		try {
 			const session = event.locals.session;
 

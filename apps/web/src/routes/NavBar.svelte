@@ -7,8 +7,12 @@
 	import { toggleMode } from 'mode-watcher';
 	import { quintOut } from 'svelte/easing';
 	import { scale, slide } from 'svelte/transition';
-
-	let isNavOpen = false; // Control the dropdown visibility on mobile
+	import { availableLanguageTags } from '$lib/paraglide/runtime';
+	import { i18n } from '$lib/i18n';
+	import { page } from '$app/stores';
+	import * as m from '$lib/paraglide/messages';
+	$: currentPathWithoutLanguage = i18n.route($page.url.pathname);
+	let isNavOpen = false;
 	let routes = [
 		{ name: 'Home', path: '/settings' },
 		{ name: 'Login', path: '/login' },
@@ -31,13 +35,23 @@
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content>
 				<DropdownMenu.Group>
-					<DropdownMenu.Label>My Account</DropdownMenu.Label>
+					<DropdownMenu.Label>{m.my_account()}</DropdownMenu.Label>
 					<DropdownMenu.Separator />
 					<form method="POST" action="?/logout">
 						<DropdownMenu.Item>
-							<button on:click={handleLogout} type="submit">Logout</button>
+							<button on:click={handleLogout} type="submit">{m.logout()}</button>
 						</DropdownMenu.Item>
 					</form>
+					<DropdownMenu.Item
+						><a href={i18n.route($page.url.pathname)} hreflang="hr">
+							{m.croatian()}
+						</a></DropdownMenu.Item
+					>
+					<DropdownMenu.Item
+						><a href={currentPathWithoutLanguage} hreflang="en">
+							{m.english()}
+						</a></DropdownMenu.Item
+					>
 				</DropdownMenu.Group>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
@@ -56,7 +70,7 @@
 			<Moon
 				class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
 			/>
-			<span class="sr-only">Toggle theme</span>
+			<span class="sr-only">{m.toggle_theme()}</span>
 		</Button>
 	</div>
 
@@ -116,7 +130,7 @@
 			<Moon
 				class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
 			/>
-			<span class="sr-only">Toggle theme</span>
+			<span class="sr-only">{m.toggle_theme()}</span>
 		</Button>
 	</div>
 {/if}

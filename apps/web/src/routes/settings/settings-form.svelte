@@ -16,6 +16,7 @@
 	} from '$lib/taskService';
 	import { useQueryClient } from '@tanstack/svelte-query';
 	import * as Table from '$lib/components/ui/table/index.js';
+	import * as m from '$lib/paraglide/messages';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	export let data: SuperValidated<Infer<FormSchema>>;
 
@@ -108,48 +109,48 @@
 	>
 		<Form.Field {form} name="taskName">
 			<Form.Control let:attrs>
-				<Form.Label>Task Name</Form.Label>
+				<Form.Label>{m.task_name()}</Form.Label>
 				<Input placeholder="Example: Clean the house" {...attrs} bind:value={$formData.taskName} />
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
 		<Form.Field {form} name="startTime">
 			<Form.Control let:attrs>
-				<Form.Label>Start Time</Form.Label>
+				<Form.Label>{m.start_time()}</Form.Label>
 				<Input type="datetime-local" {...attrs} bind:value={$formData.startTime} />
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
 		<Form.Field {form} name="endTime">
 			<Form.Control let:attrs>
-				<Form.Label>End Time</Form.Label>
+				<Form.Label>{m.end_time()}</Form.Label>
 				<Input type="datetime-local" {...attrs} bind:value={$formData.endTime} />
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
 		<div class="flex justify-center mt-4">
-			<Form.Button class="mx-auto">Submit</Form.Button>
+			<Form.Button class="mx-auto">{m.submit()}</Form.Button>
 		</div>
 	</form>
 </div>
 <div class="flex justify-center items-center flex-col">
 	{#if $fetchQuery.isPending}
 		<div class="w-full max-w-md p-4 rounded-xl">
-			<p>Loading...</p>
+			<p>{m.loading()}</p>
 		</div>
 	{:else if $fetchQuery.isError}
 		<div class="w-full max-w-md p-4 rounded-xl">
-			<p>Error: {$fetchQuery.error}</p>
+			<p>{m.error()}: {$fetchQuery.error}</p>
 		</div>
 	{:else}
 		<div class="w-full p-4 rounded-xl">
 			<Table.Root class="min-w-vh ">
-				<Table.Caption>Your tasks</Table.Caption>
+				<Table.Caption>{m.your_tasks()}</Table.Caption>
 				<Table.Header>
 					<Table.Row>
-						<Table.Head>Task Name</Table.Head>
-						<Table.Head>Start Time</Table.Head>
-						<Table.Head>End Time</Table.Head>
+						<Table.Head>{m.task_name()}</Table.Head>
+						<Table.Head>{m.start_time()}</Table.Head>
+						<Table.Head>{m.end_time()}</Table.Head>
 					</Table.Row>
 				</Table.Header>
 				<Table.Body>
@@ -161,10 +162,14 @@
 								</DropdownMenu.Trigger>
 								<DropdownMenu.Content>
 									<DropdownMenu.Group>
-										<DropdownMenu.Label>Make changes</DropdownMenu.Label>
+										<DropdownMenu.Label>{m.change()}</DropdownMenu.Label>
 										<DropdownMenu.Separator />
-										<DropdownMenu.Item on:click={() => handleEditTask(id)}>Edit</DropdownMenu.Item>
-										<DropdownMenu.Item on:click={() => handleDelete(id)}>Delete</DropdownMenu.Item>
+										<DropdownMenu.Item on:click={() => handleEditTask(id)}
+											>{m.edit()}</DropdownMenu.Item
+										>
+										<DropdownMenu.Item on:click={() => handleDelete(id)}
+											>{m.remove()}</DropdownMenu.Item
+										>
 									</DropdownMenu.Group>
 								</DropdownMenu.Content>
 							</DropdownMenu.Root>

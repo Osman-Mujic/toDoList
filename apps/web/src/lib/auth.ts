@@ -5,7 +5,11 @@ export async function getAuthHeader() {
 	const sessionId = browser ? localStorage.getItem('sessionId') : null;
 
 	if (!sessionId) {
-		const sessionId = await fetch('http://localhost:5173/settings')
+		const baseUrl =
+			browser && window.location.hostname === 'localhost'
+				? 'http://localhost:5173'
+				: 'https://hono-todoapi.osko-mujic49.workers.dev';
+		const sessionId = await fetch(`${baseUrl}/settings`)
 			.then((res) => res.json())
 			.then((res) => res.sessionId)
 			.catch(() => null);

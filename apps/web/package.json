@@ -42,6 +42,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@iconify/svelte": "^4.0.2",
 		"@inlang/paraglide-sveltekit": "0.11.0",
 		"@libsql/client": "^0.9.0",
 		"@lucia-auth/adapter-sqlite": "^3.0.2",

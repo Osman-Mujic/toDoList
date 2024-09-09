@@ -18,10 +18,6 @@
 		{ name: 'Login', path: '/login' },
 		{ name: 'Register', path: '/registration' }
 	];
-
-	async function handleLogout() {
-		localStorage.clear();
-	}
 </script>
 
 <nav class="flex items-center justify-between p-4">
@@ -59,7 +55,7 @@
 
 	<div class="hidden md:flex items-center space-x-4">
 		{#each routes as route}
-			<a href={route.path} class="hover:underline">
+			<a href={route.path} class="hover:bg-gray-500 p-1 rounded-2xl">
 				{route.name}
 			</a>
 		{/each}

@@ -4,10 +4,11 @@
 	import { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import dayjs from '@todo/utilities/dayjs';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import { PenLine, Trash2 } from 'lucide-svelte';
+	import { slide } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
 	import { formSchema, type FormSchema } from '@todo/api/src/settings/schema';
 	import EditTaskDialog from './editTaskDialog.svelte';
+	import { Button } from '$lib/components/ui/button/index.js';
 	import {
 		fetchTasks,
 		createPostTaskMutation,
@@ -18,6 +19,7 @@
 	import * as Table from '$lib/components/ui/table/index.js';
 	import * as m from '$lib/paraglide/messages';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+	import Icon from '@iconify/svelte';
 	export let data: SuperValidated<Infer<FormSchema>>;
 
 	let editingTask: {
@@ -27,6 +29,7 @@
 		endTime: string;
 	} | null = null;
 	let open = false;
+	let isSubmitting = false;
 	const queryClient = useQueryClient();
 
 	const form = superForm(data, {
@@ -41,34 +44,29 @@
 
 	const onsubmit = async (event: Event) => {
 		event.preventDefault();
+		isSubmitting = true;
 		const taskName = $formData.taskName;
 		const startTimeUTC = dayjs($formData.startTime).utc().toISOString();
 		const endTimeUTC = dayjs($formData.endTime).utc().toISOString();
-		if (editingTask) {
-			try {
+		try {
+			if (editingTask) {
 				await $editTaskMutation.mutateAsync({
 					id: editingTask.id,
 					taskName,
 					startTimeUTC,
 					endTimeUTC
 				});
-				editingTask = null;
-			} catch (error) {
-				console.error('Error updating task:', error);
-			}
-		} else {
-			try {
+			} else {
 				await $postTaskMutation.mutateAsync({ taskName, startTimeUTC, endTimeUTC });
-				editingTask = null;
-			} catch (error) {
-				console.error('Error:', error);
 			}
+			open = false;
+			editingTask = null;
+		} catch (error) {
+			console.error('Error:', error);
+		} finally {
+			isSubmitting = false;
 		}
 	};
-
-	async function handleLogout() {
-		localStorage.clear();
-	}
 
 	const handleDelete = (id: string) => {
 		$deleteTaskMutation.mutate(id);
@@ -128,23 +126,29 @@
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
-		<div class="flex justify-center mt-4">
-			<Form.Button class="mx-auto">{m.submit()}</Form.Button>
-		</div>
+		{#if isSubmitting}<div class="flex justify-center items-center">
+				<Button class="mx-auto"><Icon icon="line-md:uploading-loop" /></Button>
+			</div>{:else}
+			<div class="flex justify-center mt-4">
+				<Form.Button class="mx-auto">{m.submit()}</Form.Button>
+			</div>
+		{/if}
 	</form>
 </div>
+
 <div class="flex justify-center items-center flex-col">
 	{#if $fetchQuery.isPending}
-		<div class="w-full max-w-md p-4 rounded-xl">
-			<p>{m.loading()}</p>
-		</div>
+		<Icon icon="svg-spinners:blocks-wave" />
 	{:else if $fetchQuery.isError}
 		<div class="w-full max-w-md p-4 rounded-xl">
 			<p>{m.error()}: {$fetchQuery.error}</p>
 		</div>
 	{:else}
-		<div class="w-full p-4 rounded-xl">
-			<Table.Root class="min-w-vh ">
+		<div
+			class="w-full p-4 rounded-xl"
+			transition:slide={{ delay: 250, duration: 1000, easing: quintOut, axis: 'y' }}
+		>
+			<Table.Root class="min-w-vh">
 				<Table.Caption>{m.your_tasks()}</Table.Caption>
 				<Table.Header>
 					<Table.Row>
@@ -182,6 +186,7 @@
 		</div>
 	{/if}
 </div>
+
 {#if editingTask}
 	<EditTaskDialog bind:editingTask bind:open />
 {/if}

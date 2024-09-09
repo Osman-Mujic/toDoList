@@ -5,11 +5,7 @@ export async function getAuthHeader() {
 	const sessionId = browser ? localStorage.getItem('sessionId') : null;
 
 	if (!sessionId) {
-		const baseUrl =
-			browser && window.location.hostname === 'localhost'
-				? 'http://localhost:5173'
-				: 'https://hono-todoapi.osko-mujic49.workers.dev';
-		const sessionId = await fetch(`${baseUrl}/settings`)
+		const sessionId = await fetch('http://localhost:5173/api/session')
 			.then((res) => res.json())
 			.then((res) => res.sessionId)
 			.catch(() => null);
@@ -19,6 +15,11 @@ export async function getAuthHeader() {
 			console.log('sessionId', sessionId);
 			return `Bearer ${sessionId}`;
 		}
+
+		if (!sessionId) {
+			console.log('Session ID not found');
+		}
+
 		return null;
 	}
 

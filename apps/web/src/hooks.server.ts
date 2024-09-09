@@ -1,4 +1,3 @@
-// file initialized by the Paraglide-SvelteKit CLI - Feel free to edit it
 import { sequence } from '@sveltejs/kit/hooks';
 import type { Handle } from '@sveltejs/kit';
 import { i18n } from '$lib/i18n';
@@ -21,26 +20,32 @@ export const authHandle: Handle = async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
-	const { session, user } = await lucia.validateSession(sessionId);
+	try {
+		const { session, user } = await lucia.validateSession(sessionId);
 
-	if (session?.fresh) {
-		const sessionCookie = lucia.createSessionCookie(session.id);
-		event.cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: '.',
-			...sessionCookie.attributes
-		});
+		if (session) {
+			if (session.fresh) {
+				const sessionCookie = lucia.createSessionCookie(session.id);
+				event.cookies.set(sessionCookie.name, sessionCookie.value, {
+					path: '/',
+					...sessionCookie.attributes
+				});
+			}
+
+			event.locals.user = user;
+			event.locals.session = session;
+		} else {
+			event.cookies.delete(lucia.sessionCookieName, { path: '/' });
+			event.locals.user = null;
+			event.locals.session = null;
+		}
+	} catch (error) {
+		console.error('Session validation error:', error);
+		event.locals.user = null;
+		event.locals.session = null;
+		event.cookies.delete(lucia.sessionCookieName, { path: '/' });
 	}
 
-	if (!session) {
-		const sessionCookie = lucia.createBlankSessionCookie();
-		event.cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: '.',
-			...sessionCookie.attributes
-		});
-	}
-
-	event.locals.user = user;
-	event.locals.session = session;
 	return resolve(event);
 };
 

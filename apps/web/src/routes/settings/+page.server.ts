@@ -6,14 +6,17 @@ import { formSchema, editFormSchema } from '@todo/api/src/settings/schema';
 import { getLucia } from '@todo/utilities/server/lucia';
 import { getTursoClient } from '@todo/db/index';
 import { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } from '$env/static/private';
-export const load: PageServerLoad = async ({ locals }) => {
-	const form = await superValidate(zod(formSchema));
-	const editForm = await superValidate(zod(editFormSchema));
-	if (!locals.user) {
+export const load: PageServerLoad = async ({ cookies }) => {
+	const sessionId = cookies.get('sessionId');
+
+	if (!sessionId) {
 		return redirect(302, '/login');
 	}
+
+	const form = await superValidate(zod(formSchema));
+	const editForm = await superValidate(zod(editFormSchema));
+
 	return {
-		user: locals.user,
 		form,
 		editForm
 	};

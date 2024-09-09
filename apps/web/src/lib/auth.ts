@@ -13,7 +13,7 @@ export async function getAuthHeader() {
 
 	if (!sessionId) {
 		try {
-			const sessionId = await fetch('http://localhost:5173/api/session')
+			const sessionId = await fetch('/api/session')
 				.then((res) => res.json())
 				.then((res) => res.sessionId)
 				.catch(() => null);

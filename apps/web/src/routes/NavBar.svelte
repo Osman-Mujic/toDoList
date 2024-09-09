@@ -37,9 +37,9 @@
 				<DropdownMenu.Group>
 					<DropdownMenu.Label>{m.my_account()}</DropdownMenu.Label>
 					<DropdownMenu.Separator />
-					<form method="POST" action="?/logout">
+					<form method="POST" action="/logout">
 						<DropdownMenu.Item>
-							<button on:click={handleLogout} type="submit">{m.logout()}</button>
+							<button type="submit">{m.logout()}</button>
 						</DropdownMenu.Item>
 					</form>
 					<DropdownMenu.Item

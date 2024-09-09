@@ -4,6 +4,10 @@ import { getLucia } from "@todo/utilities/server/lucia";
 import { getTursoClient } from "@todo/db/index";
 
 const authorize: MiddlewareHandler = async (c, next) => {
+  if (c.req.path === "/register") {
+    await next();
+    return;
+  }
   const authorizationHeader = c.req.raw.headers.get("Authorization");
 
   if (!authorizationHeader) {

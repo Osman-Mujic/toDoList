@@ -27,15 +27,11 @@ export const actions: Actions = {
 			})
 		);
 		try {
-			console.log('Starting login process...');
 			const formData = await event.request.formData();
 			const username = formData.get('username');
 			const password = formData.get('password');
 
-			console.log('Received form data:', { username, password });
-
 			if (typeof username !== 'string' || typeof password !== 'string') {
-				console.log('Invalid input');
 				return fail(400, { message: 'Invalid input' });
 			}
 
@@ -44,29 +40,26 @@ export const actions: Actions = {
 				TURSO_AUTH_TOKEN
 			});
 
-			console.log('Database client initialized');
-
 			const existingUser = await db.query.users.findFirst({
 				where: eq(users.userName, username)
 			});
 
-			console.log('Existing user:', existingUser);
-
 			if (!existingUser || existingUser.hashedPassword !== password) {
-				console.log('Invalid credentials');
 				return fail(400, { message: 'Incorrect username or password' });
 			}
+
 			const session = await lucia.createSession(existingUser.id, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);
-			event.cookies.set(sessionCookie.name, sessionCookie.value, {
-				path: '.',
-				...sessionCookie.attributes
+
+			event.cookies.set('sessionId', session.id, {
+				path: '/',
+				httpOnly: true,
+				secure: process.env.NODE_ENV === 'production',
+				maxAge: 60 * 60 * 24
 			});
 
-			console.log('Login successful');
 			return { success: true };
 		} catch (error) {
-			console.error('Error during login process:', error);
 			return fail(500, { message: 'Server error during login' });
 		}
 	}

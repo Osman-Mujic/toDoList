@@ -3,11 +3,11 @@
 	import { Input } from '$lib/components/ui/input';
 	import { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
-	import { registerSchema, type RegisterSchema } from '../../../../api/src/settings/schema';
+	import { registerSchema, type RegisterSchema } from '@todo/api/src/settings/schema';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { client } from '$lib/client';
 	import { onMount } from 'svelte';
-	import { disableScrollHandling } from '$app/navigation';
+	import { disableScrollHandling, goto } from '$app/navigation';
 	import * as m from '$lib/paraglide/messages';
 
 	export let data: SuperValidated<Infer<RegisterSchema>>;
@@ -39,6 +39,7 @@
 
 			const result = await response.json();
 			console.log('Registration successful:', result);
+			goto('/login');
 		} catch (error) {
 			console.error('Error during registration:', error);
 			alert('An unexpected error occurred.');

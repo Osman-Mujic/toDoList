@@ -58,7 +58,7 @@ export const actions: Actions = {
 				secure: process.env.NODE_ENV === 'production',
 				maxAge: 60 * 60 * 24 // 1 day
 			});
-			throw redirect(303, '/settings');
+			return redirect(303, '/settings');
 		} catch (error) {
 			return fail(500, { message: 'Server error during login' });
 		}

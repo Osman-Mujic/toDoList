@@ -6,7 +6,6 @@ import { users } from '@todo/db/schema';
 import { getDatabaseClient } from '@todo/db/index';
 import { TURSO_AUTH_TOKEN, TURSO_DATABASE_URL } from '$env/static/private';
 import { eq } from 'drizzle-orm';
-import { redirect } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async (event: any) => {
 	try {
@@ -58,7 +57,8 @@ export const actions: Actions = {
 				secure: process.env.NODE_ENV === 'production',
 				maxAge: 60 * 60 * 24 // 1 day
 			});
-			return redirect(303, '/settings');
+
+			return { success: true };
 		} catch (error) {
 			return fail(500, { message: 'Server error during login' });
 		}

@@ -37,7 +37,7 @@
 				<Form.FieldErrors />
 			</Form.Field>
 			<Form.Button>{m.login()}</Form.Button>
-			<Button class="float-right" on:click={() => (window.location.href = '/register')}
+			<Button class="float-right" on:click={() => (window.location.href = '/registration')}
 				>{m.register()}</Button
 			>
 		</form>

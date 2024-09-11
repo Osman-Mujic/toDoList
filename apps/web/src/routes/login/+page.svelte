@@ -6,6 +6,16 @@
 	import { loginSchema, type Loginschema } from '@todo/api/src/settings/schema';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as m from '$lib/paraglide/messages';
+	let date: Date | undefined = undefined;
+	let time: string = '';
+
+	function handleDateSelect(event: CustomEvent<Date>) {
+		date = event.detail;
+	}
+
+	function handleTimeChange(event: Event) {
+		time = (event.target as HTMLInputElement).value;
+	}
 	export let data: SuperValidated<Infer<Loginschema>>;
 
 	const form = superForm(data, {
@@ -14,12 +24,12 @@
 	const { form: formData, enhance } = form;
 </script>
 
-<div class="flex min-h-screen">
+<div class="flex justify-center items-center">
 	<div
-		class="w-9/12 hidden lg:block bg-cover bg-origin-border bg-gradient-to-br from-white to-black rounded-3xl"
+		class="w-9/12 hidden min-h-svh lg:block bg-cover bg-origin-border bg-gradient-to-br from-white to-black rounded-3xl"
 	></div>
 
-	<div class="w-full md:w-1/2 flex min-h-svh justify-center m-auto items-center flex-col">
+	<div class="w-full md:w-1/2 flex justify-center pt-32 m-auto items-center flex-col">
 		<form class="w-full max-w-md p-6" method="POST">
 			<h1 class="text-3xl font-bold text-center">{m.login()}</h1>
 			<Form.Field {form} name="username">

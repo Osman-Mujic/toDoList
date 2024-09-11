@@ -13,9 +13,7 @@
 	export let editingTask: Infer<EditFormSchema>;
 	export let open: boolean = false;
 
-	const editForm = superForm(editingTask, {
-		validators: zodClient(editFormSchema)
-	});
+	const editForm = superForm(editingTask, { SPA: true, validators: zodClient(editFormSchema) });
 
 	const { form: editFormData, enhance: editEnhance } = editForm;
 

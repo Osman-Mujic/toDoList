@@ -20,6 +20,7 @@ export const actions: Actions = {
 				TURSO_AUTH_TOKEN
 			})
 		);
+		let success: boolean;
 		const formData = await event.request.formData();
 		const form = await superValidate(formData, zod(registerSchema));
 
@@ -61,15 +62,19 @@ export const actions: Actions = {
 
 			const hashedPassword = await hashPassword(password);
 
-			await db.insert(users).values({
+			const result = await db.insert(users).values({
 				id: crypto.randomUUID(),
 				userName: username,
 				hashedPassword: hashedPassword
 			});
-			console.log('User created successfully');
-			return redirect(302, '/login');
+			success = result.rowsAffected > 0;
 		} catch (error) {
 			return fail(500, { form, message: 'Server error during registration' });
+		}
+		if (success) {
+			return redirect(302, '/login');
+		} else {
+			return fail(400, { form, message: 'Unkown error' });
 		}
 	}
 };

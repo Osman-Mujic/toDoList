@@ -20,6 +20,7 @@
 	import * as m from '$lib/paraglide/messages';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import Icon from '@iconify/svelte';
+	import { endTime } from 'hono/timing';
 	export let data: SuperValidated<Infer<FormSchema>>;
 
 	let editingTask: {
@@ -46,8 +47,15 @@
 		event.preventDefault();
 		isSubmitting = true;
 		const taskName = $formData.taskName;
+		const startTime = dayjs($formData.startTime);
+		const endTime = dayjs($formData.endTime);
+		if (endTime.isBefore(startTime)) {
+			console.log("End time can't be before start time");
+			return;
+		}
 		const startTimeUTC = dayjs($formData.startTime).utc().toISOString();
 		const endTimeUTC = dayjs($formData.endTime).utc().toISOString();
+
 		try {
 			if (editingTask) {
 				await $editTaskMutation.mutateAsync({

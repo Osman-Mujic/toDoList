@@ -1,7 +1,9 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"login": "Login",
+	"sign_in": "Already have an accout? Sign in",
 	"register": "Register",
+	"sign_up": "Don't have an accout yet? Sign up",
 	"username": "Username",
 	"password": "Password",
 	"confirm_password": "Confirm Password",

@@ -1,7 +1,9 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"login": "Prijava",
+	"sign_in": "Već imate napravljen račun? Prijavite se",
 	"register": "Registracija",
+	"sign_up": "Nemate račun? Registrujte se",
 	"username": "Korisničko ime",
 	"password": "Lozinka",
 	"confirm_password": "Potvrdi lozinku",

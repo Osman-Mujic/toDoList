@@ -1,7 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import tasksapp from "./routes/tasks";
-import registerApp from "./routes/registration";
 
 type Bindings = {
   TURSO_DATABASE_URL: string;
@@ -16,7 +15,6 @@ const app = new Hono<{ Bindings: Bindings }>()
   )
 
   .route("/", tasksapp)
-  .route("/", registerApp)
   .get("/", (c) => c.text("API is running"));
 
 export type AppType = typeof app;

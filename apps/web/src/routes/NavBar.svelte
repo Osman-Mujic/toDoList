@@ -3,6 +3,7 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import Sun from 'lucide-svelte/icons/sun';
 	import Moon from 'lucide-svelte/icons/moon';
+	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { toggleMode } from 'mode-watcher';
 	import { quintOut } from 'svelte/easing';
@@ -11,50 +12,65 @@
 	import { i18n } from '$lib/i18n';
 	import { page } from '$app/stores';
 	import * as m from '$lib/paraglide/messages';
+
 	$: currentPathWithoutLanguage = i18n.route($page.url.pathname);
 	let isNavOpen = false;
+	let isLoggedIn = false;
+	let userName = ' ';
 	let routes = [
 		{ name: 'Home', path: '/settings' },
 		{ name: 'Login', path: '/login' },
 		{ name: 'Register', path: '/registration' }
 	];
+
+	onMount(() => {
+		page.subscribe(($page) => {
+			isLoggedIn = $page.data.isLoggedIn;
+			userName = $page.data.userName;
+		});
+	});
+	$: visibleRoutes = isLoggedIn ? [{ name: 'Home', path: '/settings' }] : routes;
 </script>
 
 <nav class="flex items-center justify-between p-4">
 	<div class="flex items-center space-x-4">
-		<DropdownMenu.Root>
-			<DropdownMenu.Trigger>
-				<Avatar.Root>
-					<Avatar.Image src="https://github.com/shadcn.png" alt="@shadcn" />
-					<Avatar.Fallback>CN</Avatar.Fallback>
-				</Avatar.Root>
-			</DropdownMenu.Trigger>
-			<DropdownMenu.Content>
-				<DropdownMenu.Group>
-					<DropdownMenu.Label>{m.my_account()}</DropdownMenu.Label>
-					<DropdownMenu.Separator />
-					<form method="POST" action="/logout">
-						<DropdownMenu.Item>
-							<button type="submit">{m.logout()}</button>
-						</DropdownMenu.Item>
-					</form>
-					<DropdownMenu.Item
-						><a href={i18n.route($page.url.pathname)} hreflang="hr">
-							{m.croatian()}
-						</a></DropdownMenu.Item
-					>
-					<DropdownMenu.Item
-						><a href={currentPathWithoutLanguage} hreflang="en">
-							{m.english()}
-						</a></DropdownMenu.Item
-					>
-				</DropdownMenu.Group>
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
+		{#if isLoggedIn}
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger>
+					<Avatar.Root>
+						<Avatar.Image src="https://github.com/shadcn.png" alt="@shadcn" />
+						<Avatar.Fallback>CN</Avatar.Fallback>
+					</Avatar.Root>
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content>
+					<DropdownMenu.Group>
+						<DropdownMenu.Label>{userName}</DropdownMenu.Label>
+						<DropdownMenu.Separator />
+						<form method="POST" action="/logout">
+							<DropdownMenu.Item>
+								<button type="submit">{m.logout()}</button>
+							</DropdownMenu.Item>
+						</form>
+						<DropdownMenu.Item
+							><a href={i18n.route($page.url.pathname)} hreflang="hr">
+								{m.croatian()}
+							</a></DropdownMenu.Item
+						>
+						<DropdownMenu.Item
+							><a href={currentPathWithoutLanguage} hreflang="en">
+								{m.english()}
+							</a></DropdownMenu.Item
+						>
+					</DropdownMenu.Group>
+				</DropdownMenu.Content>
+			</DropdownMenu.Root>
+		{:else}
+			<p class="text-2xl font-bold"></p>
+		{/if}
 	</div>
 
 	<div class="hidden md:flex items-center space-x-4">
-		{#each routes as route}
+		{#each visibleRoutes as route}
 			<a href={route.path} class="hover:bg-gray-500 p-1 rounded-2xl">
 				{route.name}
 			</a>
@@ -114,8 +130,8 @@
 </nav>
 {#if isNavOpen}
 	<div transition:slide class="flex flex-col items-center space-y-4 mt-4 md:hidden">
-		{#each routes as route}
-			<a href={route.path} class="hover:underline">
+		{#each visibleRoutes as route}
+			<a href={route.path} class="hover:bg-gray-500 p-1 rounded-2xl">
 				{route.name}
 			</a>
 		{/each}

@@ -16,35 +16,6 @@
 		validators: zodClient(registerSchema)
 	});
 	const { form: formData, enhance } = form;
-
-	const onsubmit = async (event: Event) => {
-		event.preventDefault();
-		const username = $formData.username;
-		const password = $formData.password;
-		const confirmPassword = $formData.confirmPassword;
-
-		try {
-			const response = await client.register.$post({
-				json: {
-					username,
-					password,
-					confirmPassword
-				}
-			});
-
-			if (!response.ok) {
-				alert('Failed to register');
-				return;
-			}
-
-			const result = await response.json();
-			console.log('Registration successful:', result);
-			goto('/login');
-		} catch (error) {
-			console.error('Error during registration:', error);
-			alert('An unexpected error occurred.');
-		}
-	};
 </script>
 
 <div class="flex min-h-screen">
@@ -53,7 +24,7 @@
 	></div>
 
 	<div class="w-full md:w-1/2 flex min-h-svh justify-center m-auto items-center flex-col">
-		<form class="w-full max-w-md p-6" method="POST" on:submit={onsubmit} use:enhance>
+		<form class="w-full max-w-md p-6" method="POST" use:enhance>
 			<h1 class="text-3xl font-bold text-center">{m.register()}</h1>
 			<Form.Field {form} name="username">
 				<Form.Control let:attrs>
@@ -80,10 +51,14 @@
 				</Form.Control>
 				<Form.FieldErrors />
 			</Form.Field>
-			<Form.Button>{m.register()}</Form.Button>
-			<Button class="float-right" on:click={() => (window.location.href = '/login')}
-				>{m.login()}</Button
-			>
+			<Form.Button class="w-full mt-5">{m.register()}</Form.Button>
+			<div>
+				<Button
+					variant="secondary"
+					class="w-full mt-5"
+					on:click={() => (window.location.href = '/login')}>{m.sign_in()}</Button
+				>
+			</div>
 		</form>
 	</div>
 </div>

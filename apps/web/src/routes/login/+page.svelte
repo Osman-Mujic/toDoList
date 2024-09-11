@@ -3,7 +3,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
-	import { loginSchema, type Loginschema } from '../../../../api/src/settings/schema';
+	import { loginSchema, type Loginschema } from '@todo/api/src/settings/schema';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as m from '$lib/paraglide/messages';
 	export let data: SuperValidated<Infer<Loginschema>>;
@@ -36,10 +36,14 @@
 				</Form.Control>
 				<Form.FieldErrors />
 			</Form.Field>
-			<Form.Button>{m.login()}</Form.Button>
-			<Button class="float-right" on:click={() => (window.location.href = '/registration')}
-				>{m.register()}</Button
-			>
+			<Form.Button class="w-full mt-5">{m.login()}</Form.Button>
+			<div>
+				<Button
+					class="w-full mt-5"
+					variant="secondary"
+					on:click={() => (window.location.href = '/registration')}>{m.sign_up()}</Button
+				>
+			</div>
 		</form>
 	</div>
 </div>

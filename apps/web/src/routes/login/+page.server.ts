@@ -6,18 +6,8 @@ import { users } from '@todo/db/schema';
 import { getDatabaseClient } from '@todo/db/index';
 import { TURSO_AUTH_TOKEN, TURSO_DATABASE_URL } from '$env/static/private';
 import { eq } from 'drizzle-orm';
+import { verifyPassword } from '@todo/utilities/server/password';
 
-export const load: PageServerLoad = async (event: any) => {
-	try {
-		if (event.locals.user) {
-			console.log('User is already logged in');
-		}
-		return {};
-	} catch (error) {
-		console.error('Error during load:', error);
-		return fail(500, { message: 'Server error during load' });
-	}
-};
 export const actions: Actions = {
 	default: async (event: any) => {
 		const lucia = getLucia(
@@ -44,10 +34,18 @@ export const actions: Actions = {
 				where: eq(users.userName, username)
 			});
 
-			if (!existingUser || existingUser.hashedPassword !== password) {
+			if (!existingUser) {
 				return fail(400, { message: 'Incorrect username or password' });
 			}
 
+			// Verify password using hashed password
+			const isPasswordValid = await verifyPassword(existingUser.hashedPassword, password);
+
+			if (!isPasswordValid) {
+				return fail(400, { message: 'Incorrect username or password' });
+			}
+
+			// Create session and set cookies
 			const session = await lucia.createSession(existingUser.id, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);
 
@@ -57,7 +55,6 @@ export const actions: Actions = {
 				secure: process.env.NODE_ENV === 'production',
 				maxAge: 60 * 60 * 24 // 1 day
 			});
-
 			return { success: true };
 		} catch (error) {
 			return fail(500, { message: 'Server error during login' });

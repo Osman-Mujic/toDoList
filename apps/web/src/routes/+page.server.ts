@@ -5,11 +5,15 @@ import type { Actions, PageServerLoad } from './$types';
 import { getTursoClient } from '@todo/db/index';
 import { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } from '$env/static/private';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, cookies }) => {
+	const sessionId = cookies.get('sessionId');
+	console.log('Session ID:', sessionId);
+	const isLoggedIn = Boolean(sessionId);
 	if (locals.user) {
 		throw redirect(307, '/settings');
 	}
-	return {};
+
+	return { isLoggedIn };
 };
 
 export const actions: Actions = {

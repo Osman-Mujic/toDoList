@@ -1,14 +1,10 @@
 import { Lucia } from "lucia";
 import { LibSQLAdapter } from "@lucia-auth/adapter-sqlite";
-import { createClient } from "@libsql/client";
 import type { DatabaseUser } from "@todo/db/schema";
-import { TURSO_AUTH_TOKEN } from "$env/static/private";
-import type { get } from "svelte/store";
-import type { getTursoClient } from "@todo/db/index";
+import { Google } from "arctic";
 import type { Client } from "@libsql/client";
 
 const isDev = process.env.NODE_ENV !== "production";
-
 export function getLucia(db: Client) {
   const adapter = new LibSQLAdapter(db, {
     user: "users",
@@ -36,3 +32,9 @@ declare module "lucia" {
     DatabaseUserAttributes: Omit<DatabaseUser, "id">;
   }
 }
+
+export const google = new Google(
+  process.env.GOOGLE_CLIENT_ID || "",
+  process.env.GOOGLE_CLIENT_SECRET || "",
+  "http://localhost:5173/login/google/callback"
+);

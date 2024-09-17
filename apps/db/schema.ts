@@ -6,6 +6,8 @@ export const users = sqliteTable("users", {
   userName: text("user_name").notNull(),
   hashedPassword: text("hashed_password").notNull(),
   createdAt: text("created_at").default("CURRENT_TIMESTAMP").notNull(),
+  email: text("email").unique(),
+  googleId: text("google_id").unique(),
 });
 
 export const tasks = sqliteTable("tasks", {

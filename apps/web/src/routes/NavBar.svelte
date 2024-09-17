@@ -20,7 +20,8 @@
 	let routes = [
 		{ name: 'Home', path: '/settings' },
 		{ name: 'Login', path: '/login' },
-		{ name: 'Register', path: '/registration' }
+		{ name: 'Register', path: '/registration' },
+		{ name: 'Test', path: '/test' }
 	];
 
 	onMount(() => {
@@ -29,7 +30,13 @@
 			userName = $page.data.userName;
 		});
 	});
-	$: visibleRoutes = isLoggedIn ? [{ name: 'Home', path: '/settings' }] : routes;
+	$: visibleRoutes = isLoggedIn
+		? [
+				{ name: 'Home', path: '/settings' },
+				{ name: 'Test', path: '/test' },
+				{ name: 'Old Form', path: '/oldform' }
+			]
+		: routes;
 </script>
 
 <nav class="flex items-center justify-between p-4">

@@ -6,6 +6,7 @@
 	import { loginSchema, type Loginschema } from '@todo/api/src/settings/schema';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as m from '$lib/paraglide/messages';
+	import Icon from '@iconify/svelte';
 	let date: Date | undefined = undefined;
 	let time: string = '';
 
@@ -21,6 +22,12 @@
 	const form = superForm(data, {
 		validators: zodClient(loginSchema)
 	});
+
+	async function loginWithGoogle() {
+		await fetch('/user/login/google', {
+			method: 'POST'
+		});
+	}
 	const { form: formData, enhance } = form;
 </script>
 
@@ -47,6 +54,12 @@
 				<Form.FieldErrors />
 			</Form.Field>
 			<Form.Button class="w-full mt-5">{m.login()}</Form.Button>
+			<a href="/login/google">
+				<Button class="w-full mt-5 bg-white border-2 border-solid border-black">
+					<Icon icon="basil:google-outline" width="24" height="24" />
+					Login with Google
+				</Button>
+			</a>
 			<div>
 				<Button
 					class="w-full mt-5"

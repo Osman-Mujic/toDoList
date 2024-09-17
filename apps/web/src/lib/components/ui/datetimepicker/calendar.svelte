@@ -9,7 +9,6 @@
 	import * as Command from '$lib/components/ui/command/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
-
 	const frameworks = [
 		{
 			combovalue: 'AM',
@@ -22,7 +21,9 @@
 	];
 
 	let open = false;
-	let combovalue = '';
+	export let combovalue: string = 'AM';
+	export let hours: string = '';
+	export let minutes: string = '';
 
 	$: selectedValue = frameworks.find((f) => f.combovalue === combovalue)?.label ?? 'AM';
 	function closeAndFocusTrigger(triggerId: string) {
@@ -32,13 +33,46 @@
 		});
 	}
 
-	type $$Props = CalendarPrimitive.Props;
-
+	type $$Props = CalendarPrimitive.Props & { hours: string; minutes: string; combovalue: string };
 	type $$Events = CalendarPrimitive.Events;
 
 	export let value: $$Props['value'] = undefined;
 	export let placeholder: $$Props['placeholder'] = undefined;
 	export let weekdayFormat: $$Props['weekdayFormat'] = 'short';
+
+	function handleHoursChange(event: Event) {
+		const input = event.target as HTMLInputElement;
+		let value = input.value;
+		value = value.replace(/[^0-9]/g, '');
+		if (value.length > 2) {
+			value = value.slice(0, 2);
+		}
+		const intValue = parseInt(value);
+		if (intValue > 12) {
+			hours = '12';
+		} else if (intValue <= -1 || value === '') {
+			hours = '00';
+		} else {
+			hours = value;
+		}
+	}
+
+	function handleMinutesChange(event: Event) {
+		const input = event.target as HTMLInputElement;
+		let value = input.value;
+		value = value.replace(/[^0-9]/g, '');
+		if (value.length > 2) {
+			value = value.slice(0, 2);
+		}
+		const intValue = parseInt(value);
+		if (intValue > 59) {
+			minutes = '59';
+		} else if (intValue <= -1 || value === '') {
+			minutes = '00';
+		} else {
+			minutes = value;
+		}
+	}
 
 	let className: $$Props['class'] = undefined;
 	export { className as class };
@@ -85,44 +119,52 @@
 			</Calendar.Grid>
 		{/each}
 	</Calendar.Months>
-	<Input type="time" placeholder="00" class="max-w-xs" />
-	<Input type="email" placeholder="email" class="max-w-xs" />
-	<Input type="email" placeholder="email" class="max-w-xs" />
-	<Popover.Root bind:open let:ids>
-		<Popover.Trigger asChild let:builder>
-			<Button
-				builders={[builder]}
-				variant="outline"
-				role="combobox"
-				aria-expanded={open}
-				class="w-[75px] justify-between"
-			>
-				{selectedValue}
-				<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
-			</Button>
-		</Popover.Trigger>
-		<Popover.Content class="w-[75px] p-0">
-			<Command.Root>
-				<Command.Group>
-					{#each frameworks as framework}
-						<Command.Item
-							value={framework.combovalue}
-							onSelect={(currentValue) => {
-								combovalue = currentValue;
-								closeAndFocusTrigger(ids.trigger);
-							}}
-						>
-							<Check
-								class={cn(
-									'mr-2 h-4 w-4',
-									combovalue !== framework.combovalue && 'text-transparent'
-								)}
-							/>
-							{framework.label}
-						</Command.Item>
-					{/each}
-				</Command.Group>
-			</Command.Root>
-		</Popover.Content>
-	</Popover.Root>
+	<div class="flex flex-row gap-1 mt-1 justify-center">
+		<Input
+			placeholder="00"
+			class="w-12 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+			type="number"
+			bind:value={hours}
+			on:input={handleHoursChange}
+		/>
+		<p class="p-1">:</p>
+		<Input
+			placeholder="00"
+			class="w-12 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+			type="number"
+			bind:value={minutes}
+			on:input={handleMinutesChange}
+		/>
+		<Popover.Root bind:open let:ids>
+			<Popover.Trigger asChild let:builder>
+				<Button
+					builders={[builder]}
+					variant="outline"
+					role="combobox"
+					aria-expanded={open}
+					class="w-[75px] justify-between"
+				>
+					{selectedValue}
+					<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+				</Button>
+			</Popover.Trigger>
+			<Popover.Content class="w-[75px] p-0">
+				<Command.Root>
+					<Command.Group>
+						{#each frameworks as framework}
+							<Command.Item
+								value={framework.combovalue}
+								onSelect={(currentValue) => {
+									combovalue = currentValue;
+									closeAndFocusTrigger(ids.trigger);
+								}}
+							>
+								{framework.label}
+							</Command.Item>
+						{/each}
+					</Command.Group>
+				</Command.Root>
+			</Popover.Content>
+		</Popover.Root>
+	</div>
 </CalendarPrimitive.Root>

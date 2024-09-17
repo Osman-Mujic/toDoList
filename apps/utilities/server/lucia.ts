@@ -3,6 +3,7 @@ import { LibSQLAdapter } from "@lucia-auth/adapter-sqlite";
 import type { DatabaseUser } from "@todo/db/schema";
 import { Google } from "arctic";
 import type { Client } from "@libsql/client";
+import { googleConfig } from "./config";
 
 const isDev = process.env.NODE_ENV !== "production";
 export function getLucia(db: Client) {
@@ -34,7 +35,7 @@ declare module "lucia" {
 }
 
 export const google = new Google(
-  process.env.GOOGLE_CLIENT_ID || "",
-  process.env.GOOGLE_CLIENT_SECRET || "",
-  "http://localhost:5173/login/google/callback"
+  googleConfig.clientId,
+  googleConfig.clientSecret,
+  googleConfig.redirectUri
 );

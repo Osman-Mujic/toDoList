@@ -3,9 +3,9 @@ import { LibSQLAdapter } from "@lucia-auth/adapter-sqlite";
 import type { DatabaseUser } from "@todo/db/schema";
 import { Google } from "arctic";
 import type { Client } from "@libsql/client";
-import { googleConfig } from "./config";
 
 const isDev = process.env.NODE_ENV !== "production";
+
 export function getLucia(db: Client) {
   const adapter = new LibSQLAdapter(db, {
     user: "users",
@@ -33,9 +33,3 @@ declare module "lucia" {
     DatabaseUserAttributes: Omit<DatabaseUser, "id">;
   }
 }
-
-export const google = new Google(
-  googleConfig.clientId,
-  googleConfig.clientSecret,
-  googleConfig.redirectUri
-);

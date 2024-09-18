@@ -7,10 +7,7 @@
 	import { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import dayjs from '@todo/utilities/dayjs';
-	import { slide } from 'svelte/transition';
-	import { quintOut } from 'svelte/easing';
 	import { formSchema, type FormSchema } from '@todo/api/src/settings/schema';
-	import EditTaskDialog from './editTaskDialog.svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import {
 		fetchTasks,
@@ -24,23 +21,26 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import Icon from '@iconify/svelte';
 	import { DateTimePicker } from '$lib/components/ui/datetimepicker/index.js';
-	import { parseDate, type DateValue } from '@internationalized/date';
 	import { DateFormatter, getLocalTimeZone } from '@internationalized/date';
 	export let data: SuperValidated<Infer<FormSchema>>;
 
-	let tempStartTime: DateValue | undefined = undefined;
-	let tempEndTime: DateValue | undefined = undefined;
-	let tempStartHour: string;
-	let tempStartMinute: string;
-	let tempStartAmPm: string;
-	let tempEndHour: string;
-	let tempEndMinute: string;
-	let tempEndAmPm: string;
+	// Time management variables
+	let startTime: string | undefined = undefined;
+	let endTime: string | undefined = undefined;
+
+	let tempStartHour: string = '00';
+	let tempStartMinute: string = '00';
+	let tempStartAmPm: string = 'AM';
+
+	let tempEndHour: string = '00';
+	let tempEndMinute: string = '00';
+	let tempEndAmPm: string = 'AM';
+
 	let editingTask: {
 		id: string;
 		taskName: string;
-		startTime: DateValue | undefined;
-		endTime: DateValue | undefined;
+		startTime: string;
+		endTime: string;
 		startHour: string;
 		startMinute: string;
 		startAmPm: string;
@@ -48,68 +48,60 @@
 		endMinute: string;
 		endAmPm: string;
 	} | null = null;
+
 	let open = false;
 	let isSubmitting = false;
+
+	// Set up form validation and mutations
 	const queryClient = useQueryClient();
 	const form = superForm(data, {
 		validators: zodClient(formSchema)
 	});
 	const { form: formData, enhance } = form;
+
 	let fetchQuery = fetchTasks();
 	let postTaskMutation = createPostTaskMutation(queryClient);
 	let deleteTaskMutation = createDeleteTaskMutation(queryClient);
 	let editTaskMutation = createEditTaskMutation(queryClient);
+
+	// Handle form submission
 	const onsubmit = async (event: Event) => {
 		event.preventDefault();
 		isSubmitting = true;
 
 		const taskName = $formData.taskName;
-		const startHour = tempStartHour || '00';
-		const startMinute = tempStartMinute || '00';
-		const startAmPm = tempStartAmPm || 'AM';
-		const endHour = tempEndHour || '00';
-		const endMinute = tempEndMinute || '00';
-		const endAmPm = tempEndAmPm || 'AM';
 
-		const startTimeString = dayjs(
-			`${tempStartTime} ${startHour}:${startMinute} ${startAmPm}`,
-			'YYYY-MM-DD hh:mm A'
-		).format('YYYY-MM-DD HH:mm');
+		if (!startTime || !endTime) {
+			console.error('Start time or end time not selected.');
+			isSubmitting = false;
+			return;
+		}
 
-		const endTimeString = dayjs(
-			`${tempEndTime} ${endHour}:${endMinute} ${endAmPm}`,
-			'YYYY-MM-DD hh:mm A'
-		).format('YYYY-MM-DD HH:mm');
-		const startTime = dayjs(startTimeString, 'YYYY-MM-DD hh:mm A');
-		const endTime = dayjs(endTimeString, 'YYYY-MM-DD hh:mm A');
+		const startTimeObj = dayjs(startTime, 'YYYY-MM-DD HH:mm:ss');
+		const endTimeObj = dayjs(endTime, 'YYYY-MM-DD HH:mm:ss');
 
-		if (endTime.isBefore(startTime)) {
+		if (endTimeObj.isBefore(startTimeObj)) {
 			console.log("End time can't be before start time");
 			isSubmitting = false;
 			return;
 		}
 
-		const startTimeUTC = startTime.utc().toISOString();
-		const endTimeUTC = endTime.utc().toISOString();
-		$formData.startTime = startTimeUTC;
-		$formData.endTime = endTimeUTC;
-		console.log($formData);
-		console.log('Start time: ', startTimeUTC);
-		console.log('End time: ', endTimeUTC);
+		$formData.startTime = startTimeObj.utc().toISOString();
+		$formData.endTime = endTimeObj.utc().toISOString();
 
 		try {
 			if (editingTask) {
 				await $editTaskMutation.mutateAsync({
 					id: editingTask.id,
 					taskName,
-					startTimeUTC,
-					endTimeUTC
+					startTimeUTC: $formData.startTime,
+					endTimeUTC: $formData.endTime
 				});
 			} else {
 				await $postTaskMutation.mutateAsync({
 					taskName,
-					startTimeUTC,
-					endTimeUTC
+					startTimeUTC: $formData.startTime,
+					endTimeUTC: $formData.endTime
 				});
 			}
 
@@ -121,17 +113,21 @@
 			isSubmitting = false;
 		}
 	};
+
+	// Handle task deletion
 	const handleDelete = (id: string) => {
 		$deleteTaskMutation.mutate(id);
 	};
+
+	// Handle task edit
 	const handleEditTask = (id: string) => {
 		if ($fetchQuery.data) {
 			const task = $fetchQuery.data.find((task: any) => task.id === id);
 			if (task) {
 				editingTask = {
 					...task,
-					startTime: parseDate(task.startTime),
-					endTime: parseDate(task.endTime),
+					startTime: dayjs(task.startTime).format('YYYY-MM-DDTHH:mm:ssZ'),
+					endTime: dayjs(task.endTime).format('YYYY-MM-DDTHH:mm:ssZ'),
 					startHour: dayjs(task.startTime).format('hh'),
 					startMinute: dayjs(task.startTime).format('mm'),
 					startAmPm: dayjs(task.startTime).format('A'),
@@ -140,24 +136,23 @@
 					endAmPm: dayjs(task.endTime).format('A')
 				};
 				open = true;
-			} else {
-				console.log('No task found');
-				editingTask = null;
-				open = false;
 			}
-		} else {
-			console.error('No data available to edit');
 		}
 	};
-	$: if (!open) {
-		editingTask = null;
-		queryClient.invalidateQueries({ queryKey: ['tasks'] });
+
+	// Handle start and end time updates
+	function handleStartTimeChange(formattedStartTime: string) {
+		startTime = formattedStartTime;
+		console.log('Start Time Updated:', startTime);
 	}
-	const df = new DateFormatter('en-US', {
-		dateStyle: 'long'
-	});
+
+	function handleEndTimeChange(formattedEndTime: string) {
+		endTime = formattedEndTime;
+		console.log('End Time Updated:', endTime);
+	}
 </script>
 
+<!-- Form -->
 <div class="flex justify-center items-center flex-col">
 	<form
 		class="w-full max-w-md p-6 rounded-xl"
@@ -166,6 +161,7 @@
 		action="?/submit"
 		on:submit={onsubmit}
 	>
+		<!-- Task Name -->
 		<Form.Field {form} name="taskName">
 			<Form.Control let:attrs>
 				<Form.Label>{m.task_name()}</Form.Label>
@@ -174,20 +170,20 @@
 			<Form.FieldErrors />
 		</Form.Field>
 
+		<!-- Start Time Picker -->
 		<Popover.Root>
 			<Popover.Trigger asChild let:builder>
 				<Button
 					variant="outline"
 					class={cn(
 						'w-33 mt-3 justify-start text-left font-normal',
-						!tempStartTime && 'text-muted-foreground'
+						!startTime && 'text-muted-foreground'
 					)}
 					builders={[builder]}
 				>
 					<CalendarIcon class="mr-2 h-4 w-4" />
-					{#if tempStartTime}{df.format(tempStartTime.toDate(getLocalTimeZone()))}
-						{tempStartHour}:{tempStartMinute}
-						{tempStartAmPm}
+					{#if startTime}
+						{dayjs(startTime).format('YYYY-MM-DD HH:mm A')}
 					{:else}
 						Pick the starting time of your task
 					{/if}
@@ -198,33 +194,31 @@
 					<Form.Control let:attrs>
 						<Form.Label>{m.start_time()}</Form.Label>
 						<DateTimePicker
-							bind:value={tempStartTime}
 							bind:hours={tempStartHour}
 							bind:minutes={tempStartMinute}
 							bind:combovalue={tempStartAmPm}
+							onChange={handleStartTimeChange}
 						/>
 					</Form.Control>
 					<Form.FieldErrors class="mt-1 text-red-600" />
 				</Form.Field>
 			</Popover.Content>
 		</Popover.Root>
-		<br />
-		<!-- End Time Field with Custom DateTimePicker -->
+
+		<!-- End Time Picker -->
 		<Popover.Root>
 			<Popover.Trigger asChild let:builder>
 				<Button
 					variant="outline"
 					class={cn(
 						' mt-3 justify-start text-left font-normal',
-						!tempEndTime && 'text-muted-foreground'
+						!endTime && 'text-muted-foreground'
 					)}
 					builders={[builder]}
 				>
 					<CalendarIcon class="mr-2 h-4 w-4" />
-					{#if tempEndTime}
-						{df.format(tempEndTime.toDate(getLocalTimeZone()))}
-						{tempEndHour}:{tempEndMinute}
-						{tempEndAmPm}
+					{#if endTime}
+						{dayjs(endTime).format('YYYY-MM-DD HH:mm A')}
 					{:else}
 						Pick the ending time of your task
 					{/if}
@@ -235,28 +229,25 @@
 					<Form.Control let:attrs>
 						<Form.Label>{m.end_time()}</Form.Label>
 						<DateTimePicker
-							bind:value={tempEndTime}
 							bind:hours={tempEndHour}
 							bind:minutes={tempEndMinute}
 							bind:combovalue={tempEndAmPm}
+							onChange={handleEndTimeChange}
 						/>
 					</Form.Control>
-					<Form.FieldErrors />
+					<Form.FieldErrors class="mt-1 text-red-600" />
 				</Form.Field>
 			</Popover.Content>
 		</Popover.Root>
 
-		<!-- {#if isSubmitting}
-			<div class="flex justify-center items-center">
-				<Button class="mx-auto"><Icon icon="line-md:uploading-loop" /></Button>
-			</div>
-		{:else} -->
+		<!-- Submit Button -->
 		<div class="flex justify-center mt-4">
 			<Form.Button class="mx-auto">{m.submit()}</Form.Button>
 		</div>
-		<!-- {/if} -->
 	</form>
 </div>
+
+<!-- Task Table -->
 <div class="flex justify-center items-center flex-col">
 	{#if $fetchQuery.isPending}
 		<Icon icon="svg-spinners:blocks-wave" />
@@ -304,6 +295,3 @@
 		</div>
 	{/if}
 </div>
-{#if editingTask}
-	<EditTaskDialog bind:editingTask bind:open />
-{/if}

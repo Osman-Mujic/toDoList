@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import { redirect } from '@sveltejs/kit';
+import { Google } from 'arctic';
 
 export async function getAuthHeader() {
 	if (!browser) {

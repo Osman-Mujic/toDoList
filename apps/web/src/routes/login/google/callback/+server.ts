@@ -1,5 +1,6 @@
 import { OAuth2RequestError } from 'arctic';
-import { google, getLucia } from '@todo/utilities/server/lucia';
+import { getLucia } from '@todo/utilities/server/lucia';
+import { google } from '$lib/server/googleAuth';
 import type { RequestEvent } from '@sveltejs/kit';
 import { getTursoClient } from '@todo/db/index';
 import { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } from '$env/static/private';

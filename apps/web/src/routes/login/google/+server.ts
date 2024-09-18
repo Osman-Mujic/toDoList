@@ -1,6 +1,6 @@
 import type { RequestEvent } from '../$types';
 import { generateCodeVerifier, generateState } from 'arctic';
-import { google } from '@todo/utilities/server/lucia';
+import { google } from '$lib/server/googleAuth';
 import { redirect } from '@sveltejs/kit';
 export async function GET(event: RequestEvent): Promise<Response> {
 	const state = generateState();

@@ -8,8 +8,8 @@
 
 	const df = new DateFormatter('en-US', { dateStyle: 'long' });
 
-	let startTime: DateValue | undefined = undefined;
-	let endTime: DateValue | undefined = undefined;
+	let startTime: string | undefined = undefined;
+	let endTime: string | undefined = undefined;
 
 	let startHours: string = '';
 	let startMinutes: string = '';
@@ -18,6 +18,16 @@
 	let endHours: string = '';
 	let endMinutes: string = '';
 	let endCombovalue: string = 'PM';
+
+	function handleStartTimeUpdate(dateTime: string) {
+		startTime = dateTime;
+		console.log('Updated Start Time:', startTime);
+	}
+
+	function handleEndTimeUpdate(dateTime: string) {
+		endTime = dateTime;
+		console.log('Updated End Time:', endTime);
+	}
 </script>
 
 <div class="flex flex-col gap-4">
@@ -33,9 +43,7 @@
 			>
 				<CalendarIcon class="mr-2 h-4 w-4" />
 				{#if startTime}
-					{df.format(startTime.toDate(getLocalTimeZone()))}
-					{startHours}:{startMinutes}
-					{startCombovalue}
+					{startTime} <!-- Display already formatted start time -->
 				{:else}
 					Pick a start date
 				{/if}
@@ -43,10 +51,10 @@
 		</Popover.Trigger>
 		<Popover.Content class="w-auto p-0">
 			<DateTimePicker
-				bind:value={startTime}
 				bind:hours={startHours}
 				bind:minutes={startMinutes}
 				bind:combovalue={startCombovalue}
+				onChange={handleStartTimeUpdate}
 			/>
 		</Popover.Content>
 	</Popover.Root>
@@ -63,7 +71,7 @@
 			>
 				<CalendarIcon class="mr-2 h-4 w-4" />
 				{#if endTime}
-					{df.format(endTime.toDate(getLocalTimeZone()))} {endHours}:{endMinutes} {endCombovalue}
+					{endTime} <!-- Display already formatted end time -->
 				{:else}
 					Pick an end date
 				{/if}
@@ -71,10 +79,10 @@
 		</Popover.Trigger>
 		<Popover.Content class="w-auto p-0">
 			<DateTimePicker
-				bind:value={endTime}
 				bind:hours={endHours}
 				bind:minutes={endMinutes}
 				bind:combovalue={endCombovalue}
+				onChange={handleEndTimeUpdate}
 			/>
 		</Popover.Content>
 	</Popover.Root>

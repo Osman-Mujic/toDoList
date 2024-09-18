@@ -5,10 +5,11 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import Check from 'lucide-svelte/icons/check';
 	import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
-	import { tick } from 'svelte';
+	import { tick, createEventDispatcher } from 'svelte';
 	import * as Command from '$lib/components/ui/command/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import dayjs from 'dayjs';
 	const frameworks = [
 		{
 			combovalue: 'AM',
@@ -21,9 +22,12 @@
 	];
 
 	let open = false;
+	export let value: $$Props['value'] = undefined;
+	export let hours: string = '00';
+	export let minutes: string = '00';
 	export let combovalue: string = 'AM';
-	export let hours: string = '';
-	export let minutes: string = '';
+	export let dateString: string = '';
+	export let onChange: (dateTime: string) => void;
 
 	$: selectedValue = frameworks.find((f) => f.combovalue === combovalue)?.label ?? 'AM';
 	function closeAndFocusTrigger(triggerId: string) {
@@ -33,12 +37,25 @@
 		});
 	}
 
-	type $$Props = CalendarPrimitive.Props & { hours: string; minutes: string; combovalue: string };
+	type $$Props = CalendarPrimitive.Props & {
+		hours: string;
+		minutes: string;
+		combovalue: string;
+		onChange: (dateTime: string) => void;
+	};
 	type $$Events = CalendarPrimitive.Events;
 
-	export let value: $$Props['value'] = undefined;
 	export let placeholder: $$Props['placeholder'] = undefined;
 	export let weekdayFormat: $$Props['weekdayFormat'] = 'short';
+
+	function triggerChange() {
+		const finalTime = `${dateString} ${hours}:${minutes} ${combovalue}`;
+		const formattedTime = dayjs(finalTime, 'YYYY-MM-DD hh:mm A').format('YYYY-MM-DD HH:mm:ss');
+
+		if (onChange) {
+			onChange(formattedTime);
+		}
+	}
 
 	function handleHoursChange(event: Event) {
 		const input = event.target as HTMLInputElement;
@@ -55,6 +72,12 @@
 		} else {
 			hours = value;
 		}
+		triggerChange();
+		// format the complete date time iso string
+		// 1. get the actual date from the internal shadcn calendar component
+		// 2. get the actual time from my custom stuff
+		// 3. combine them into a nice iso string to return to my parent component
+		// trigger the onChange Event
 	}
 
 	function handleMinutesChange(event: Event) {
@@ -72,6 +95,12 @@
 		} else {
 			minutes = value;
 		}
+		triggerChange();
+	}
+
+	function handleDateChange(val: any) {
+		dateString = val ? (Array.isArray(val) ? val[0]?.toString() : val.toString()) : '';
+		triggerChange(); // Call triggerChange when the date is updated
 	}
 
 	let className: $$Props['class'] = undefined;
@@ -87,6 +116,7 @@
 	on:keydown
 	let:months
 	let:weekdays
+	onValueChange={handleDateChange}
 >
 	<Calendar.Header>
 		<Calendar.PrevButton />
@@ -157,6 +187,7 @@
 								onSelect={(currentValue) => {
 									combovalue = currentValue;
 									closeAndFocusTrigger(ids.trigger);
+									triggerChange();
 								}}
 							>
 								{framework.label}
